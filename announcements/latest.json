@@ -8,9 +8,9 @@
     "downloadUrl": "https://github.com/Czenb/UJNB/releases/download/v1.2.17/UJNB-1.2.17.apk",
     "message": "当前版本已停止支持，请下载并安装 1.2.17 后继续使用。"
   },
-  "id": "ujiang-1.2.17",
+  "id": "ujiang-membership-test-2",
   "title": "公告",
-  "body": "官方Q群：433955531\n官方TG：@Czenb6\n\n账号试运行版最新优化\n• 分享文件先确认转存，成功后再下载；UC 保存到「U酱转存」，云端文件继续保留。\n• 新增服务维护控制：维护时暂停下载，恢复后可手动继续普通文件下载。\n• 完整启动时检查更新、显示公告，切后台返回不重复弹出。\n• 分享列表移除重复按钮；退出登录移到账号注销上方。\n• 公告正文右下角显示更新时间，精确到分钟。\n\n以上适用于最新账号试运行包。公开下载仍为正式版 1.2.17，旧包不会自动获得试运行功能。转存成功是否计入活动收益，以各网盘活动后台为准。\n\n正式版 1.2.17 保持强制更新。请覆盖安装，不要卸载或清除数据，以免丢失账号与下载记录。",
+  "body": "官方Q群：433955531\n官方TG：@Czenb6\n\n受邀测试版 1.2.18-test.2 更新\n• 免费签到每天领5积分，无需观看广告；积分商城可兑换3天、7天、30天会员卡。\n• 兑换后获得32位卡密，在“我的→签到中心”激活。新建解析和下载需要登录并激活会员；已有任务可续传。\n• 网盘卡片显示U酱会员状态；下载页新增全部、下载中、已完成、失败分类和实时数量。下载中包含排队、下载和暂停任务。\n• 界面采用彩色文字和图标、清楚的卡片分区，新增独立签到和商城入口。\n• 网盘页换用各平台真实应用图标，缩小卡片留白，一屏展示更多网盘。\n• 解析页右上角新增“历史”：本机加密保存最近100条成功解析记录，支持复制链接和提取码、再次解析、删除与清空。\n• 优化百度手机网页登录和下载令牌验证；分享文件先转存再下载，下载后保留云端文件。\n• 完整启动检查更新并显示公告，从后台返回不重复弹出；维护期间暂停所有下载。\n\n以上适用于受邀测试包。公开下载仍为正式版1.2.17，旧包不会自动获得测试功能。请覆盖安装，保留账号和下载记录。\n转存成功是否计入推广收益，以网盘活动后台实际结算为准。",
   "minVersionCode": 13,
   "buttonText": "进入官方Q群",
   "buttonUrl": "https://qun.qq.com/universal-share/share?ac=1&authKey=K6QbZlEM5ZVdvpaw%2Fx6ZMVyzwCtN9f7SyfIqLe7D4c2xNb6yDhw%2Fl2YYmDYyZ1o%2F&busi_data=eyJncm91cENvZGUiOiI0MzM5NTU1MzEiLCJ0b2tlbiI6Ik8zWnE0RUtRcm1VWDQzMWhmajdXc29OY0t1ekFuRmZJMmI2dVJsZlJqbFd6NWNBZXVjdkozKzZNdWtRbDVnKysiLCJ1aW4iOiI3MjUyOTQ0NTQifQ%3D%3D&data=nRKy86QAdJAYkgOuYiOM31vKC7VSyafqyWcfKMK9wqWTD4GdtgUQJfgf9FORVkQWuI9AVgbrMCrlptRelKkdiA&svctype=4&tempid=h5_group_info",
@@ -21,6 +21,6 @@
     "title": "暂停服务",
     "message": "服务暂时暂停，请稍后重试。恢复后无需重新安装。"
   },
-  "revision": 5,
-  "updatedAt": "2026-09-15 21:59"
+  "revision": 6,
+  "updatedAt": "2026-09-18 03:44"
 }
