@@ -8,9 +8,9 @@
     "downloadUrl": "https://github.com/Czenb/UJNB/releases/download/v1.2.17/UJNB-1.2.17.apk",
     "message": "当前版本已停止支持，请下载并安装 1.2.17 后继续使用。"
   },
-  "id": "ujiang-fixed64-test-3",
+  "id": "ujiang-maintenance-test-4",
   "title": "公告",
-  "body": "官方Q群：433955531\n官方TG：@Czenb6\n\n受邀测试版 1.2.18-test.3 更新\n\n• 百度网盘、迅雷网盘统一固定64线程，旧线程设置自动按新策略生效，设置页不可修改这两个平台的档位。\n• 迅雷下载引擎同步移除原8并发上限。64为单任务分片并发上限；小文件、下载收尾及服务器不支持分片时，实际连接数可能更少。\n• 保留分片校验、暂停续传及不支持分片时的单流回退。旧任务若分片计划变化，继续下载时可能重新下载未完成文件。\n• 下载服务器明确拒绝或限流（HTTP 401/403/429）时停止自动重试，避免继续发送下载请求。\n• 64线程不代表网盘不限速权益，也不保证账号不会受到平台限制；出现官方限制通知请停止下载并按官方提示处理。\n• 保留签到积分、卡密会员、解析历史、下载分类、先转存后下载和远程暂停功能。\n\n仅适用于受邀测试包，公开下载仍为正式版1.2.17。请覆盖安装以保留账号和下载记录。\n转存成功是否计入推广收益，以网盘活动后台实际结算为准。\n",
+  "body": "官方Q群：433955531\n官方TG：@Czenb6\n\n受邀测试版 1.2.18-test.4 更新\n\n• 服务暂停时显示“App 维护中”，新增“加入 QQ 群”按钮；有问题可前往官方群反馈，服务恢复后可重新检查。\n• 测试包增加业务类加壳保护，保留远程暂停、会员和账号功能。\n• 百度网盘、迅雷网盘统一固定64线程，旧线程设置自动按新策略生效，设置页不可修改这两个平台的档位。\n• 迅雷下载引擎同步移除原8并发上限。64为单任务分片并发上限；小文件、下载收尾及服务器不支持分片时，实际连接数可能更少。\n• 保留分片校验、暂停续传及不支持分片时的单流回退。旧任务若分片计划变化，继续下载时可能重新下载未完成文件。\n• 下载服务器明确拒绝或限流（HTTP 401/403/429）时停止自动重试，避免继续发送下载请求。\n• 64线程不代表网盘不限速权益，也不保证账号不会受到平台限制；出现官方限制通知请停止下载并按官方提示处理。\n• 保留签到积分、卡密会员、解析历史、下载分类、先转存后下载和远程暂停功能。\n\n仅适用于受邀测试包，公开下载仍为正式版1.2.17。请覆盖安装以保留账号和下载记录。\n转存成功是否计入推广收益，以网盘活动后台实际结算为准。\n",
   "minVersionCode": 13,
   "buttonText": "进入官方Q群",
   "buttonUrl": "https://qun.qq.com/universal-share/share?ac=1&authKey=K6QbZlEM5ZVdvpaw%2Fx6ZMVyzwCtN9f7SyfIqLe7D4c2xNb6yDhw%2Fl2YYmDYyZ1o%2F&busi_data=eyJncm91cENvZGUiOiI0MzM5NTU1MzEiLCJ0b2tlbiI6Ik8zWnE0RUtRcm1VWDQzMWhmajdXc29OY0t1ekFuRmZJMmI2dVJsZlJqbFd6NWNBZXVjdkozKzZNdWtRbDVnKysiLCJ1aW4iOiI3MjUyOTQ0NTQifQ%3D%3D&data=nRKy86QAdJAYkgOuYiOM31vKC7VSyafqyWcfKMK9wqWTD4GdtgUQJfgf9FORVkQWuI9AVgbrMCrlptRelKkdiA&svctype=4&tempid=h5_group_info",
@@ -21,6 +21,6 @@
     "title": "暂停服务",
     "message": "服务暂时暂停，请稍后重试。恢复后无需重新安装。"
   },
-  "revision": 7,
-  "updatedAt": "2026-09-18 05:00"
+  "revision": 8,
+  "updatedAt": "2026-09-18 06:36"
 }
