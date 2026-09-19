@@ -1,0 +1,26 @@
+{
+  "enabled": true,
+  "requiredUpdate": {
+    "enabled": true,
+    "minimumVersionCode": 27,
+    "targetVersionCode": 27,
+    "versionName": "1.2.18-transfer.1-B",
+    "downloadUrl": "https://qun.qq.com/universal-share/share?ac=1&authKey=K6QbZlEM5ZVdvpaw%2Fx6ZMVyzwCtN9f7SyfIqLe7D4c2xNb6yDhw%2Fl2YYmDYyZ1o%2F&busi_data=eyJncm91cENvZGUiOiI0MzM5NTU1MzEiLCJ0b2tlbiI6Ik8zWnE0RUtRcm1VWDQzMWhmajdXc29OY0t1ekFuRmZJMmI2dVJsZlJqbFd6NWNBZXVjdkozKzZNdWtRbDVnKysiLCJ1aW4iOiI3MjUyOTQ0NTQifQ%3D%3D&data=nRKy86QAdJAYkgOuYiOM31vKC7VSyafqyWcfKMK9wqWTD4GdtgUQJfgf9FORVkQWuI9AVgbrMCrlptRelKkdiA&svctype=4&tempid=h5_group_info",
+    "message": "本测试版本已停止支持，请到官方群获取对应测试包。"
+  },
+  "id": "ujiang-transfer-1-official",
+  "title": "公告",
+  "body": "官方Q群：433955531\n官方TG：@Czenb6\n\n夸克官方页面转存测试\n• 粘贴原分享链接后进入官方分享页，请在页面内点击保存。\n• 保存后点击「返回网盘下载」，在自己的夸克网盘选择文件下载。\n• 本版内的夸克登录页和官方分享页共用网页登录状态；会话过期或首次安装需要登录。\n\n• A、B 与旧版本均可独立安装，首次使用请登录 U酱账号并激活会员。\n• 保留签到积分、会员、下载分类、暂停续传及远程维护。\n• 百度和迅雷仍为固定64线程，实际连接数取决于文件与服务器。\n• 转存完成不等于推广收益已入账，以活动结算为准。\n• 请用不同测试者分别测试 A、B，避免同人同链接同日重复转存影响统计。",
+  "minVersionCode": 27,
+  "buttonText": "进入官方Q群",
+  "buttonUrl": "https://qun.qq.com/universal-share/share?ac=1&authKey=K6QbZlEM5ZVdvpaw%2Fx6ZMVyzwCtN9f7SyfIqLe7D4c2xNb6yDhw%2Fl2YYmDYyZ1o%2F&busi_data=eyJncm91cENvZGUiOiI0MzM5NTU1MzEiLCJ0b2tlbiI6Ik8zWnE0RUtRcm1VWDQzMWhmajdXc29OY0t1ekFuRmZJMmI2dVJsZlJqbFd6NWNBZXVjdkozKzZNdWtRbDVnKysiLCJ1aW4iOiI3MjUyOTQ0NTQifQ%3D%3D&data=nRKy86QAdJAYkgOuYiOM31vKC7VSyafqyWcfKMK9wqWTD4GdtgUQJfgf9FORVkQWuI9AVgbrMCrlptRelKkdiA&svctype=4&tempid=h5_group_info",
+  "downloadVersionCode": 27,
+  "downloadUrl": "https://qun.qq.com/universal-share/share?ac=1&authKey=K6QbZlEM5ZVdvpaw%2Fx6ZMVyzwCtN9f7SyfIqLe7D4c2xNb6yDhw%2Fl2YYmDYyZ1o%2F&busi_data=eyJncm91cENvZGUiOiI0MzM5NTU1MzEiLCJ0b2tlbiI6Ik8zWnE0RUtRcm1VWDQzMWhmajdXc29OY0t1ekFuRmZJMmI2dVJsZlJqbFd6NWNBZXVjdkozKzZNdWtRbDVnKysiLCJ1aW4iOiI3MjUyOTQ0NTQifQ%3D%3D&data=nRKy86QAdJAYkgOuYiOM31vKC7VSyafqyWcfKMK9wqWTD4GdtgUQJfgf9FORVkQWuI9AVgbrMCrlptRelKkdiA&svctype=4&tempid=h5_group_info",
+  "maintenance": {
+    "enabled": false,
+    "title": "App 维护中",
+    "message": "App 维护中，有问题请前往官方Q群 433955531。"
+  },
+  "revision": 1,
+  "updatedAt": "2026-09-20 02:09"
+}
