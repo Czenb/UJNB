@@ -2,25 +2,25 @@
   "enabled": true,
   "requiredUpdate": {
     "enabled": true,
-    "minimumVersionCode": 27,
-    "targetVersionCode": 27,
-    "versionName": "1.2.18-transfer.1-B",
-    "downloadUrl": "https://qun.qq.com/universal-share/share?ac=1&authKey=K6QbZlEM5ZVdvpaw%2Fx6ZMVyzwCtN9f7SyfIqLe7D4c2xNb6yDhw%2Fl2YYmDYyZ1o%2F&busi_data=eyJncm91cENvZGUiOiI0MzM5NTU1MzEiLCJ0b2tlbiI6Ik8zWnE0RUtRcm1VWDQzMWhmajdXc29OY0t1ekFuRmZJMmI2dVJsZlJqbFd6NWNBZXVjdkozKzZNdWtRbDVnKysiLCJ1aW4iOiI3MjUyOTQ0NTQifQ%3D%3D&data=nRKy86QAdJAYkgOuYiOM31vKC7VSyafqyWcfKMK9wqWTD4GdtgUQJfgf9FORVkQWuI9AVgbrMCrlptRelKkdiA&svctype=4&tempid=h5_group_info",
+    "minimumVersionCode": 28,
+    "targetVersionCode": 28,
+    "versionName": "1.2.18-transfer.2-B",
+    "downloadUrl": "https://qm.qq.com/q/Va7bOTWaUE",
     "message": "本测试版本已停止支持，请到官方群获取对应测试包。"
   },
-  "id": "ujiang-transfer-1-official-accounts",
+  "id": "ujiang-transfer-2-official-all-platforms",
   "title": "公告",
-  "body": "官方Q群：433955531\n官方TG：@Czenb6\n\n夸克官方页面转存测试\n• 粘贴原分享链接后进入官方分享页，请在页面内点击保存。\n• 保存后点击「返回网盘下载」，在自己的夸克网盘选择文件下载。\n• 本版内的夸克登录页和官方分享页共用网页登录状态；会话过期或首次安装需要登录。\n\n• 桌面名称为「u酱B版」，与另一测试版和旧版独立安装。\n• 请使用对应版本的测试账号登录；A、B 账号互不通用。预发测试账号已激活3天会员。\n• 保留签到积分、会员、下载分类、暂停续传及远程维护。\n• 百度和迅雷仍为固定64线程，实际连接数取决于文件与服务器。\n• 转存完成不等于推广收益已入账，以活动结算为准。\n• 请用不同测试者分别测试 A、B，避免同人同链接同日重复转存影响统计。",
-  "minVersionCode": 27,
+  "body": "官方Q群：287820802\n官方TG：@Czenb6\n\n六网盘官方页面转存测试\n• 解析原分享链接后，可选择在对应官方网盘App完成手机端保存，也可继续使用内置官方分享页。\n• 未安装官方App或该版本不支持直接打开链接时会明确提示，不自动切换外部浏览器。\n• 官方App与U酱的网盘登录相互独立，返回下载前请确认使用同一网盘账号。\n• 保存后点击「返回网盘下载」，从自己的对应网盘选择刚保存的文件。\n• 有效且可复用的网页登录状态会沿用；首次安装、登录过期或官方页面要求验证时，请完成登录。\n\n• 支持夸克、UC、百度网盘、迅雷、移动云盘、123云盘。\n• 桌面名称为「u酱B版」，与另一测试版和旧正式版独立安装；可覆盖升级同组测试版。\n• 请使用对应版本的测试账号登录，A、B账号互不通用。预发测试账号的3天会员从原激活时间起算，升级或重新登录不重领，以显示的到期时间为准。\n• 保留签到积分、会员、下载分类、暂停续传及独立远程维护。\n• 百度与迅雷保持固定64分片线程上限，实际连接数取决于文件和网盘服务器。\n• 转存成功不等于推广收益入账，以各活动规则和后台结算为准。\n• 对照测试请使用不同测试者，避免同一账号、同一链接、同日重复转存影响统计。",
+  "minVersionCode": 28,
   "buttonText": "进入官方Q群",
-  "buttonUrl": "https://qun.qq.com/universal-share/share?ac=1&authKey=K6QbZlEM5ZVdvpaw%2Fx6ZMVyzwCtN9f7SyfIqLe7D4c2xNb6yDhw%2Fl2YYmDYyZ1o%2F&busi_data=eyJncm91cENvZGUiOiI0MzM5NTU1MzEiLCJ0b2tlbiI6Ik8zWnE0RUtRcm1VWDQzMWhmajdXc29OY0t1ekFuRmZJMmI2dVJsZlJqbFd6NWNBZXVjdkozKzZNdWtRbDVnKysiLCJ1aW4iOiI3MjUyOTQ0NTQifQ%3D%3D&data=nRKy86QAdJAYkgOuYiOM31vKC7VSyafqyWcfKMK9wqWTD4GdtgUQJfgf9FORVkQWuI9AVgbrMCrlptRelKkdiA&svctype=4&tempid=h5_group_info",
-  "downloadVersionCode": 27,
-  "downloadUrl": "https://qun.qq.com/universal-share/share?ac=1&authKey=K6QbZlEM5ZVdvpaw%2Fx6ZMVyzwCtN9f7SyfIqLe7D4c2xNb6yDhw%2Fl2YYmDYyZ1o%2F&busi_data=eyJncm91cENvZGUiOiI0MzM5NTU1MzEiLCJ0b2tlbiI6Ik8zWnE0RUtRcm1VWDQzMWhmajdXc29OY0t1ekFuRmZJMmI2dVJsZlJqbFd6NWNBZXVjdkozKzZNdWtRbDVnKysiLCJ1aW4iOiI3MjUyOTQ0NTQifQ%3D%3D&data=nRKy86QAdJAYkgOuYiOM31vKC7VSyafqyWcfKMK9wqWTD4GdtgUQJfgf9FORVkQWuI9AVgbrMCrlptRelKkdiA&svctype=4&tempid=h5_group_info",
+  "buttonUrl": "https://qm.qq.com/q/Va7bOTWaUE",
+  "downloadVersionCode": 28,
+  "downloadUrl": "https://qm.qq.com/q/Va7bOTWaUE",
   "maintenance": {
     "enabled": false,
     "title": "App 维护中",
-    "message": "App 维护中，有问题请前往官方Q群 433955531。"
+    "message": "App 维护中，有问题请前往官方Q群 287820802。"
   },
-  "revision": 2,
-  "updatedAt": "2026-09-20 03:47"
+  "revision": 3,
+  "updatedAt": "2026-09-20 07:18"
 }
