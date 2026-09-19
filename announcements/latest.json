@@ -10,17 +10,17 @@
   },
   "id": "ujiang-old-channels-paused",
   "title": "公告",
-  "body": "官方Q群：433955531\n官方TG：@Czenb6\n\n此前正式版和测试版已暂停服务。App 维护中，有问题请前往官方群。\n受邀的 A、B 转存测试使用独立安装包，请按群内说明测试。",
+  "body": "官方Q群：287820802\n官方TG：@Czenb6\n\n此前正式版和测试版已暂停服务。App 维护中，有问题请前往官方群。\n受邀的 A、B 转存测试使用独立安装包，请按群内说明测试。",
   "minVersionCode": 13,
   "buttonText": "进入官方Q群",
-  "buttonUrl": "https://qun.qq.com/universal-share/share?ac=1&authKey=K6QbZlEM5ZVdvpaw%2Fx6ZMVyzwCtN9f7SyfIqLe7D4c2xNb6yDhw%2Fl2YYmDYyZ1o%2F&busi_data=eyJncm91cENvZGUiOiI0MzM5NTU1MzEiLCJ0b2tlbiI6Ik8zWnE0RUtRcm1VWDQzMWhmajdXc29OY0t1ekFuRmZJMmI2dVJsZlJqbFd6NWNBZXVjdkozKzZNdWtRbDVnKysiLCJ1aW4iOiI3MjUyOTQ0NTQifQ%3D%3D&data=nRKy86QAdJAYkgOuYiOM31vKC7VSyafqyWcfKMK9wqWTD4GdtgUQJfgf9FORVkQWuI9AVgbrMCrlptRelKkdiA&svctype=4&tempid=h5_group_info",
+  "buttonUrl": "https://qm.qq.com/q/Va7bOTWaUE",
   "downloadVersionCode": 21,
   "downloadUrl": "https://github.com/Czenb/UJNB/releases/download/v1.2.17/UJNB-1.2.17.apk",
   "maintenance": {
     "enabled": true,
     "title": "App 维护中",
-    "message": "App 维护中，有问题请前往官方Q群 433955531。"
+    "message": "App 维护中，有问题请前往官方Q群 287820802。"
   },
-  "revision": 10,
-  "updatedAt": "2026-09-20 02:15"
+  "revision": 11,
+  "updatedAt": "2026-09-20 06:47"
 }
