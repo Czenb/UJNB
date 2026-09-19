@@ -8,9 +8,9 @@
     "downloadUrl": "https://qun.qq.com/universal-share/share?ac=1&authKey=K6QbZlEM5ZVdvpaw%2Fx6ZMVyzwCtN9f7SyfIqLe7D4c2xNb6yDhw%2Fl2YYmDYyZ1o%2F&busi_data=eyJncm91cENvZGUiOiI0MzM5NTU1MzEiLCJ0b2tlbiI6Ik8zWnE0RUtRcm1VWDQzMWhmajdXc29OY0t1ekFuRmZJMmI2dVJsZlJqbFd6NWNBZXVjdkozKzZNdWtRbDVnKysiLCJ1aW4iOiI3MjUyOTQ0NTQifQ%3D%3D&data=nRKy86QAdJAYkgOuYiOM31vKC7VSyafqyWcfKMK9wqWTD4GdtgUQJfgf9FORVkQWuI9AVgbrMCrlptRelKkdiA&svctype=4&tempid=h5_group_info",
     "message": "本测试版本已停止支持，请到官方群获取对应测试包。"
   },
-  "id": "ujiang-transfer-1-auto",
+  "id": "ujiang-transfer-1-auto-accounts",
   "title": "公告",
-  "body": "官方Q群：433955531\n官方TG：@Czenb6\n\n夸克自动转存测试\n• 解析分享后选择文件，自动转存到「U酱转存」，确认保存完成后下载。\n• 转存流程已更新为当前官方网页使用的分享接口。\n\n• A、B 与旧版本均可独立安装，首次使用请登录 U酱账号并激活会员。\n• 保留签到积分、会员、下载分类、暂停续传及远程维护。\n• 百度和迅雷仍为固定64线程，实际连接数取决于文件与服务器。\n• 转存完成不等于推广收益已入账，以活动结算为准。\n• 请用不同测试者分别测试 A、B，避免同人同链接同日重复转存影响统计。",
+  "body": "官方Q群：433955531\n官方TG：@Czenb6\n\n夸克自动转存测试\n• 解析分享后选择文件，自动转存到「U酱转存」，确认保存完成后下载。\n• 转存流程已更新为当前官方网页使用的分享接口。\n\n• 桌面名称为「u酱A版」，与另一测试版和旧版独立安装。\n• 请使用对应版本的测试账号登录；A、B 账号互不通用。预发测试账号已激活3天会员。\n• 保留签到积分、会员、下载分类、暂停续传及远程维护。\n• 百度和迅雷仍为固定64线程，实际连接数取决于文件与服务器。\n• 转存完成不等于推广收益已入账，以活动结算为准。\n• 请用不同测试者分别测试 A、B，避免同人同链接同日重复转存影响统计。",
   "minVersionCode": 27,
   "buttonText": "进入官方Q群",
   "buttonUrl": "https://qun.qq.com/universal-share/share?ac=1&authKey=K6QbZlEM5ZVdvpaw%2Fx6ZMVyzwCtN9f7SyfIqLe7D4c2xNb6yDhw%2Fl2YYmDYyZ1o%2F&busi_data=eyJncm91cENvZGUiOiI0MzM5NTU1MzEiLCJ0b2tlbiI6Ik8zWnE0RUtRcm1VWDQzMWhmajdXc29OY0t1ekFuRmZJMmI2dVJsZlJqbFd6NWNBZXVjdkozKzZNdWtRbDVnKysiLCJ1aW4iOiI3MjUyOTQ0NTQifQ%3D%3D&data=nRKy86QAdJAYkgOuYiOM31vKC7VSyafqyWcfKMK9wqWTD4GdtgUQJfgf9FORVkQWuI9AVgbrMCrlptRelKkdiA&svctype=4&tempid=h5_group_info",
@@ -21,6 +21,6 @@
     "title": "App 维护中",
     "message": "App 维护中，有问题请前往官方Q群 433955531。"
   },
-  "revision": 1,
-  "updatedAt": "2026-09-20 02:09"
+  "revision": 2,
+  "updatedAt": "2026-09-20 03:47"
 }
