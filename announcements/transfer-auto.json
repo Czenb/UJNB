@@ -2,25 +2,25 @@
   "enabled": true,
   "requiredUpdate": {
     "enabled": true,
-    "minimumVersionCode": 28,
-    "targetVersionCode": 28,
-    "versionName": "1.2.18-transfer.2-A",
+    "minimumVersionCode": 31,
+    "targetVersionCode": 31,
+    "versionName": "1.2.18-transfer.5-A",
     "downloadUrl": "https://qm.qq.com/q/Va7bOTWaUE",
     "message": "本测试版本已停止支持，请到官方群获取对应测试包。"
   },
-  "id": "ujiang-transfer-2-auto-all-platforms",
+  "id": "ujiang-transfer-5-auto",
   "title": "公告",
-  "body": "官方Q群：287820802\n官方TG：@Czenb6\n\n六网盘自动转存测试\n• 解析原分享链接并选择文件后，先自动转存到自己的对应网盘，再创建下载任务。\n• 转存成功确认前不会开始下载；请在对应官方网盘核对保存结果。\n\n• 支持夸克、UC、百度网盘、迅雷、移动云盘、123云盘。\n• 桌面名称为「u酱A版」，与另一测试版和旧正式版独立安装；可覆盖升级同组测试版。\n• 请使用对应版本的测试账号登录，A、B账号互不通用。预发测试账号的3天会员从原激活时间起算，升级或重新登录不重领，以显示的到期时间为准。\n• 保留签到积分、会员、下载分类、暂停续传及独立远程维护。\n• 百度与迅雷保持固定64分片线程上限，实际连接数取决于文件和网盘服务器。\n• 自动转存不保证按手机端计佣；转存成功不等于推广收益入账，以各活动规则和后台结算为准。\n• 对照测试请使用不同测试者，避免同一账号、同一链接、同日重复转存影响统计。",
-  "minVersionCode": 28,
+  "body": "官方Q群：287820802\n官方TG：@Czenb6\n\nU酱解析A版 · 自动转存测试\n• 解析分享链接并选择文件后，先自动转存到自己的网盘，确认转存成功后再创建下载任务。\n• 支持夸克、UC、百度、迅雷、移动云盘、123云盘。请在官方网盘核对保存结果。\n• 暂不开放自行注册，请使用分配的A版账号；A、B版账号互不通用。登录并激活会员后才能新建解析和下载任务。\n• 每日签到完成滑块验证可领积分，在商城兑换会员卡密后，到“我的”激活。原会员期限不会因升级或重新登录而延长。\n• 支持下载分类、暂停续传及远程维护。百度和迅雷的64分片线程是并发上限，实际连接数由文件及网盘服务决定。\n• 自动转存不保证按手机端计佣，是否获得收益以推广活动规则和后台结算为准。\n• 对照测试请使用不同测试者，避免同账号、同链接、同日重复转存影响统计。\n\n遇到使用问题请到官方群反馈。",
+  "minVersionCode": 31,
   "buttonText": "进入官方Q群",
   "buttonUrl": "https://qm.qq.com/q/Va7bOTWaUE",
-  "downloadVersionCode": 28,
+  "downloadVersionCode": 31,
   "downloadUrl": "https://qm.qq.com/q/Va7bOTWaUE",
   "maintenance": {
     "enabled": false,
     "title": "App 维护中",
     "message": "App 维护中，有问题请前往官方Q群 287820802。"
   },
-  "revision": 3,
-  "updatedAt": "2026-09-20 07:18"
+  "revision": 5,
+  "updatedAt": "2026-09-20 17:16"
 }
