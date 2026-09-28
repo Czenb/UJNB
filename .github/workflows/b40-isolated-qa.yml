@@ -15,13 +15,14 @@ on:
           - full
           - navigation-credential
           - resigned-only
+          - inapp-upgrade
 
 permissions:
   contents: read
 
 jobs:
   final-apk:
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master' && inputs.qa_scope != 'inapp-upgrade'
     runs-on: ubuntu-24.04
     environment: b40-qa
     timeout-minutes: 45
@@ -214,6 +215,142 @@ jobs:
           if-no-files-found: warn
           retention-days: 1
       - name: Remove QA plaintext and scratch files
+        if: always()
+        shell: bash
+        env:
+          QA_WORKDIR: ${{ steps.fetch.outputs.workdir }}
+        run: |
+          set -euo pipefail
+          if [ -n "$QA_WORKDIR" ]; then
+            case "$QA_WORKDIR" in
+              "$RUNNER_TEMP"/b40qa.*)
+                for attempt in 1 2 3 4 5; do
+                  if rm -rf -- "$QA_WORKDIR"; then break; fi
+                  sleep 2
+                done
+                test ! -e "$QA_WORKDIR" ;;
+              *) echo 'Refusing unexpected QA scratch path' >&2; exit 1 ;;
+            esac
+          fi
+
+  inapp-upgrade:
+    if: github.ref == 'refs/heads/qa/b40-inapp-20260928' && inputs.qa_scope == 'inapp-upgrade'
+    runs-on: ubuntu-24.04
+    environment: b40-inapp-qa-20260928
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - name: Fetch and authenticate isolated upgrade input
+        id: fetch
+        shell: bash
+        env:
+          QA_ASSET_ID: ${{ inputs.encrypted_asset_id }}
+          GH_TOKEN: ${{ github.token }}
+          UJNB_B40_QA_KEY: ${{ secrets.UJNB_B40_QA_KEY }}
+        run: |
+          set -euo pipefail
+          test "$RUNNER_ARCH" = X64
+          [[ "$QA_ASSET_ID" =~ ^[0-9]+$ ]]
+          [[ "$UJNB_B40_QA_KEY" =~ ^[0-9a-fA-F]{64}$ ]]
+          workdir=$(mktemp -d "$RUNNER_TEMP/b40qa.XXXXXX")
+          echo "workdir=$workdir" >> "$GITHUB_OUTPUT"
+          curl --fail-with-body --silent --show-error --location --retry 3 \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header 'Accept: application/octet-stream' \
+            --header 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/Czenb/UJNB/releases/assets/$QA_ASSET_ID" \
+            --output "$workdir/input.aesgcm"
+          node "$GITHUB_WORKSPACE/.github/scripts/qa-crypto.mjs" decrypt \
+            "$workdir/input.aesgcm" "$workdir/input.tar.gz"
+          expected=$(printf '%s\n' UJNB-1.2.18-transfer.14-B.apk \
+            UJNB-1.2.18-transfer.15-B-qa.db14-r2.apk release-tests-release.apk \
+            release-symbols.txt | sort)
+          actual=$(tar -tzf "$workdir/input.tar.gz" | sort)
+          test "$actual" = "$expected"
+          mkdir "$workdir/source"
+          tar -xzf "$workdir/input.tar.gz" -C "$workdir/source"
+          cd "$workdir/source"
+          sha256sum -c - <<SHA256SUMS
+          9fbef0397928878f09e74d3cc58e55c2be87f3ca6575cc6767202b685b64e6fc  UJNB-1.2.18-transfer.14-B.apk
+          6cf9c385faefe88b662767e330bf4571bdc1d04b85ba171b0908f63d6c4c827f  UJNB-1.2.18-transfer.15-B-qa.db14-r2.apk
+          a36ff77963bef8830fb355b07ee44e1427d5575ea2ec81779e3fe75bd70fb9ac  release-tests-release.apk
+          01fe196e103ba4be3fb627a906614d707d82db6ab018bba7a29f5470242fba2b  release-symbols.txt
+          SHA256SUMS
+      - name: Boot isolated ARM64-bridge emulator and exercise frozen B40
+        shell: bash
+        env:
+          QA_WORKDIR: ${{ steps.fetch.outputs.workdir }}
+        run: |
+          set -euo pipefail
+          test -d "$QA_WORKDIR/source"
+          test -c /dev/kvm
+          sudo setfacl -m "u:$(id -un):rw" /dev/kvm
+          test -r /dev/kvm && test -w /dev/kvm
+          sdkmanager_path=$(find "$ANDROID_HOME/cmdline-tools" -maxdepth 4 \
+            -type f -name sdkmanager -print -quit)
+          test -n "$sdkmanager_path"
+          export PATH="$(dirname "$sdkmanager_path"):$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
+          printf 'y\n%.0s' {1..20} | sdkmanager --licenses > "$QA_WORKDIR/sdk-licenses.log"
+          sdkmanager --install 'system-images;android-35;google_apis;x86_64' 'build-tools;36.0.0'
+          export ANDROID_AVD_HOME="$QA_WORKDIR/avds"
+          mkdir -p "$ANDROID_AVD_HOME"
+          printf 'no\n' | avdmanager create avd -n ujnb-b40-inapp-qa \
+            -k 'system-images;android-35;google_apis;x86_64' -d pixel_4 -f
+          emulator_pid=
+          trap 'if [ -n "$emulator_pid" ]; then adb -s emulator-5558 emu kill >/dev/null 2>&1 || true; kill "$emulator_pid" 2>/dev/null || true; wait "$emulator_pid" 2>/dev/null || true; fi' EXIT
+          "$ANDROID_HOME/emulator/emulator" -avd ujnb-b40-inapp-qa -port 5558 \
+            -no-window -no-audio -no-snapshot -no-boot-anim -accel on \
+            -gpu swiftshader_indirect -memory 2048 -partition-size 2048 \
+            > "$QA_WORKDIR/emulator.log" 2>&1 &
+          emulator_pid=$!
+          ready=0
+          for attempt in $(seq 1 120); do
+            if [ "$(adb -s emulator-5558 shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = 1 ]; then
+              ready=1
+              break
+            fi
+            if ! kill -0 "$emulator_pid" 2>/dev/null; then break; fi
+            sleep 3
+          done
+          if [ "$ready" -ne 1 ]; then tail -n 80 "$QA_WORKDIR/emulator.log"; exit 1; fi
+          test "$(adb -s emulator-5558 shell getprop ro.kernel.qemu | tr -d '\r')" = 1
+          abi=$(adb -s emulator-5558 shell getprop ro.product.cpu.abilist | tr -d '\r')
+          bridge=$(adb -s emulator-5558 shell getprop ro.dalvik.vm.native.bridge | tr -d '\r')
+          case ",$abi," in *,arm64-v8a,*) ;; *) echo 'ARM64 ABI missing' >&2; exit 1 ;; esac
+          test "$bridge" = libndk_translation.so
+          bash "$GITHUB_WORKSPACE/.github/scripts/native-bridge-probe.sh" emulator-5558
+          curl --fail-with-body --silent --show-error --location --retry 3 \
+            'https://github.com/cloudflare/cloudflared/releases/download/2026.9.3/cloudflared-linux-amd64' \
+            --output "$QA_WORKDIR/cloudflared"
+          printf '%s  %s\n' \
+            77e26d8d900e0b8469f416239d14b5f296525fdf79fee6f511ef55609e3fbac2 \
+            "$QA_WORKDIR/cloudflared" | sha256sum -c -
+          chmod 700 "$QA_WORKDIR/cloudflared"
+          python3 "$GITHUB_WORKSPACE/.github/scripts/inapp_upgrade_qa.py" \
+            --serial emulator-5558 \
+            --b40 "$QA_WORKDIR/source/UJNB-1.2.18-transfer.14-B.apk" \
+            --tester "$QA_WORKDIR/source/release-tests-release.apk" \
+            --b41 "$QA_WORKDIR/source/UJNB-1.2.18-transfer.15-B-qa.db14-r2.apk" \
+            --symbols "$QA_WORKDIR/source/release-symbols.txt" \
+            --cloudflared "$QA_WORKDIR/cloudflared" --workdir "$QA_WORKDIR"
+      - name: Preserve redacted isolated upgrade evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: b40-inapp-upgrade-evidence
+          path: |
+            ${{ steps.fetch.outputs.workdir }}/upgrade-result.json
+            ${{ steps.fetch.outputs.workdir }}/b40-required.png
+            ${{ steps.fetch.outputs.workdir }}/b40-progress.png
+            ${{ steps.fetch.outputs.workdir }}/b41-installer.png
+            ${{ steps.fetch.outputs.workdir }}/b41-postinstall-home.png
+            ${{ steps.fetch.outputs.workdir }}/b41-postinstall-failure.png
+          if-no-files-found: warn
+          retention-days: 1
+      - name: Remove isolated QA plaintext and scratch files
         if: always()
         shell: bash
         env:
