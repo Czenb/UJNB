@@ -270,6 +270,20 @@ class UpgradeScriptTest(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "identity is incomplete"):
                 device.installed()
 
+    def test_ui_dump_retries_non_xml_without_logging_page_text(self):
+        device = qa.Device("emulator-5558")
+        responses = ["dumped", "account-secret", "dumped",
+                     '<hierarchy><node text="下载新版本" bounds="[1,1][3,3]"/></hierarchy>']
+        with patch.object(device, "adb", side_effect=responses) as adb, \
+             patch.object(qa.time, "sleep", return_value=None):
+            self.assertEqual("下载新版本", device.window()[0]["text"])
+            self.assertEqual(4, adb.call_count)
+        with patch.object(device, "adb", side_effect=["dumped", "account-secret"] * 3), \
+             patch.object(qa.time, "sleep", return_value=None):
+            with self.assertRaisesRegex(RuntimeError, "UI hierarchy unavailable") as failure:
+                device.window()
+            self.assertNotIn("account-secret", str(failure.exception))
+
     def test_crash_screen_fails_after_policy_cleanup(self):
         exit_code, result = self.run_scenario(failure="crash")
         self.assertEqual(1, exit_code)

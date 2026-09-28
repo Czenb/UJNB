@@ -117,10 +117,22 @@ class Device:
         return self.instrument(f"ReleasePolicyQaSeedTest#{action}", args)
 
     def window(self):
-        self.adb("shell", "uiautomator", "dump", WINDOW_XML, timeout=25)
-        raw = self.adb("exec-out", "cat", WINDOW_XML, timeout=15)
-        nodes = ET.fromstring(raw).iter("node")
-        return [node.attrib for node in nodes]
+        failure = ""
+        for attempt in range(3):
+            try:
+                self.adb("shell", "uiautomator", "dump", WINDOW_XML, timeout=25)
+                raw = self.adb("exec-out", "cat", WINDOW_XML, timeout=15)
+                if not raw.lstrip("\ufeff\r\n\t ").startswith("<"):
+                    failure = f"non-XML bytes={len(raw)} prefix={raw[:8].encode().hex()}"
+                else:
+                    return [node.attrib for node in ET.fromstring(raw).iter("node")]
+            except ET.ParseError as error:
+                failure = f"malformed XML at {error.position}"
+            except RuntimeError as error:
+                failure = f"ADB dump failed: {error}"
+            if attempt < 2:
+                time.sleep(1)
+        raise RuntimeError(f"UI hierarchy unavailable after 3 attempts: {failure}")
 
     def screenshot(self, path):
         result = subprocess.run(("adb", "-s", self.serial, "exec-out", "screencap", "-p"),
