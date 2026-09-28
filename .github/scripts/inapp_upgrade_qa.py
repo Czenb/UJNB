@@ -345,9 +345,11 @@ def run(args):
         device.adb("shell", "monkey", "-p", PACKAGE, "-c",
                    "android.intent.category.LAUNCHER", "1", timeout=30)
         deadline = time.monotonic() + 90
+        last_nodes = []
         stable_home_samples = 0
         while time.monotonic() < deadline:
             nodes = device.window()
+            last_nodes = nodes
             if any(node.get("text") == "开始使用" for node in nodes):
                 device.tap(next(node for node in nodes if node.get("text") == "开始使用"))
             matches = [node for node in nodes if node.get("text") == "下载新版本"]
@@ -357,6 +359,12 @@ def run(args):
                 break
             time.sleep(1)
         else:
+            device.screenshot(args.workdir / "b40-required-failure.png")
+            known = ("开始使用", "请更新后继续使用", "下载新版本",
+                     "无法获取最新状态，请检查网络后重试。", "设置", "我的")
+            result["b40_visible_known_labels"] = sorted({node.get("text") for node in last_nodes
+                                                         if node.get("text") in known})
+            result["b40_process_running"] = bool(device.adb("shell", "pidof", PACKAGE).strip())
             raise RuntimeError("frozen B40 did not show the required-update button")
 
         deadline = time.monotonic() + 1200

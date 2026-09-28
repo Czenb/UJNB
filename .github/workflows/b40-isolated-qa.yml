@@ -346,6 +346,7 @@ jobs:
           path: |
             ${{ steps.fetch.outputs.workdir }}/upgrade-result.json
             ${{ steps.fetch.outputs.workdir }}/b40-required.png
+            ${{ steps.fetch.outputs.workdir }}/b40-required-failure.png
             ${{ steps.fetch.outputs.workdir }}/b40-progress.png
             ${{ steps.fetch.outputs.workdir }}/b41-installer.png
             ${{ steps.fetch.outputs.workdir }}/b41-postinstall-home.png
