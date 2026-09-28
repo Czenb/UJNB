@@ -252,7 +252,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$RUNNER_ARCH" = X64
-          [[ "$QA_CIPHERTEXT_URL" =~ ^https://206[.]187[.]208[.]47/download/qa/[0-9a-f]{64}/b40-inapp-db14-r7-input[.]tar[.]gz[.]aesgcm$ ]]
+          [[ "$QA_CIPHERTEXT_URL" =~ ^https://206[.]187[.]208[.]47/download/qa/[0-9a-f]{48}/b40-inapp-db14-r7-input[.]tar[.]gz[.]aesgcm$ ]]
           [[ "$UJNB_B40_QA_KEY" =~ ^[0-9a-fA-F]{64}$ ]]
           workdir=$(mktemp -d "$RUNNER_TEMP/b40qa.XXXXXX")
           echo "workdir=$workdir" >> "$GITHUB_OUTPUT"
