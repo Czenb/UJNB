@@ -14,6 +14,7 @@ on:
         options:
           - full
           - navigation-credential
+          - resigned-only
 
 permissions:
   contents: read
@@ -54,6 +55,7 @@ jobs:
           case "$QA_SCOPE" in
             full) expected=4801e8f37ec433980b48669d31a658db89aa9a367eff3f797e6315b76a12213b ;;
             navigation-credential) expected=27d92bbdb783050d529a8394dc167d8021c43571d7363be5e3a142d16154f751 ;;
+            resigned-only) expected=906dda7fd6f65e483e6b9b975eeec6772121c8db8309e77313b836424570f5bc ;;
             *) exit 1 ;;
           esac
           printf '%s  %s\n' "$expected" "$workdir/input.aesgcm" | sha256sum -c -
@@ -71,6 +73,7 @@ jobs:
           case "$QA_SCOPE" in
             full) expected=3d09df0822cb60c012e8387378867bf2619e5ea20910a0d47d8a7f1da712ce60 ;;
             navigation-credential) expected=19685be36860f723b25b32c55f9dec072fee92dc53ec60614c601334774aa0a8 ;;
+            resigned-only) expected=981c373424dfefaeb3c54f3f5c66cdd15a6e1d27ad96cf43d18999e75ecf6756 ;;
             *) exit 1 ;;
           esac
           printf '%s  %s\n' "$expected" "$QA_WORKDIR/input.tar.gz" | sha256sum -c -
@@ -88,11 +91,17 @@ jobs:
           test -r /dev/kvm && test -w /dev/kvm
           emulator_pid=
           trap 'if [ -n "$emulator_pid" ]; then kill "$emulator_pid" 2>/dev/null || true; fi' EXIT
-          expected=$(printf '%s\n' \
-            app/build/outputs/apk/release/app-release.apk \
-            release-tests/build/outputs/apk/release/release-tests-release.apk \
-            app/build/outputs/androidTest-results/shell-evaluation/symbols.txt \
-            scripts/test-release.sh scripts/test-resigned.py scripts/emulator_target.py | sort)
+          case "$QA_SCOPE" in
+            resigned-only) expected=$(printf '%s\n' \
+              app/build/outputs/apk/release/app-release.apk \
+              scripts/test-resigned.py scripts/emulator_target.py | sort) ;;
+            full|navigation-credential) expected=$(printf '%s\n' \
+              app/build/outputs/apk/release/app-release.apk \
+              release-tests/build/outputs/apk/release/release-tests-release.apk \
+              app/build/outputs/androidTest-results/shell-evaluation/symbols.txt \
+              scripts/test-release.sh scripts/test-resigned.py scripts/emulator_target.py | sort) ;;
+            *) exit 1 ;;
+          esac
           actual=$(tar -tzf "$workdir/input.tar.gz" | sort)
           test "$actual" = "$expected"
           mkdir "$workdir/source"
@@ -103,9 +112,17 @@ jobs:
                   script_sha=70b55fd6713f94f925957873978b2d5468c15b6751409ea807495786e3f3f199 ;;
             navigation-credential) test_sha=d7632b7f30937fae2bbd29f47a2bd990a6bf2a90bccf23b2d10145518f872a27
                   script_sha=d75e91854bc31c8637d484d5621ddfb06e7303f430d7ae9631821a14bc8a30f5 ;;
+            resigned-only) resigned_sha=bd26f3c9ecd7b0d73486eb1a492688218f9798c2fbd13c63425ffd43e03ab14b ;;
             *) exit 1 ;;
           esac
-          sha256sum -c - <<SHA256SUMS
+          if [ "$QA_SCOPE" = resigned-only ]; then
+            sha256sum -c - <<SHA256SUMS
+          9fbef0397928878f09e74d3cc58e55c2be87f3ca6575cc6767202b685b64e6fc  app/build/outputs/apk/release/app-release.apk
+          $resigned_sha  scripts/test-resigned.py
+          abb8ce27e4d6a5a122c1f65d287e95c5b881f799f83a4767ed7bb8cb6631b99b  scripts/emulator_target.py
+          SHA256SUMS
+          else
+            sha256sum -c - <<SHA256SUMS
           9fbef0397928878f09e74d3cc58e55c2be87f3ca6575cc6767202b685b64e6fc  app/build/outputs/apk/release/app-release.apk
           $test_sha  release-tests/build/outputs/apk/release/release-tests-release.apk
           01fe196e103ba4be3fb627a906614d707d82db6ab018bba7a29f5470242fba2b  app/build/outputs/androidTest-results/shell-evaluation/symbols.txt
@@ -113,9 +130,10 @@ jobs:
           26c5f73d4d47c4f2d50a3fe7c5d575a821180c3a0eee576a3337a7fef4857263  scripts/test-resigned.py
           abb8ce27e4d6a5a122c1f65d287e95c5b881f799f83a4767ed7bb8cb6631b99b  scripts/emulator_target.py
           SHA256SUMS
-          ln app/build/outputs/apk/release/app-release.apk \
-            app/build/outputs/androidTest-results/shell-evaluation/candidate.apk
-          perl -pi -e 's/\r\n/\n/g' scripts/test-release.sh
+            ln app/build/outputs/apk/release/app-release.apk \
+              app/build/outputs/androidTest-results/shell-evaluation/candidate.apk
+            perl -pi -e 's/\r\n/\n/g' scripts/test-release.sh
+          fi
 
           command -v timeout
           command -v sha256sum
@@ -155,22 +173,46 @@ jobs:
             -keyalg RSA -keysize 2048 -validity 365 -dname 'CN=Isolated QA' \
             > "$workdir/keytool.log" 2>&1
           export ANDROID_SERIAL=emulator-5558
-          export UJNB_RELEASE_SKIP_BUILD=1 UJNB_TRANSFER_VARIANT=official
-          export UJNB_RELEASE_QA_SCOPE="$QA_SCOPE"
-          export UJNB_RELEASE_SYMBOLS_FILE=app/build/outputs/androidTest-results/shell-evaluation/symbols.txt
-          if ! bash scripts/test-release.sh; then
-            if [ -f app/build/outputs/androidTest-results/release-blackbox/logcat.txt ]; then
-              grep 'UJNB-ReleaseBlackBox' \
-                app/build/outputs/androidTest-results/release-blackbox/logcat.txt || true
-            fi
-            exit 1
-          fi
-          if [ "$QA_SCOPE" = full ]; then
-            test -s app/build/outputs/androidTest-results/release-blackbox/resigned-result.txt
-            printf 'B40 final APK SHA256=9fbef0397928878f09e74d3cc58e55c2be87f3ca6575cc6767202b685b64e6fc: full tests + resigned negative passed\n'
+          export UJNB_TRANSFER_VARIANT=official
+          if [ "$QA_SCOPE" = resigned-only ]; then
+            python3 scripts/test-resigned.py
+            result=app/build/outputs/androidTest-results/release-blackbox/resigned-result.txt
+            grep -Fq 'PASS: Android 拒绝异签覆盖安装' "$result"
+            grep -Fq 'PASS: 卸载后换证书重签包启动被产品完整性门槛阻止' "$result"
+            test -s app/build/outputs/androidTest-results/release-blackbox/resigned-blocked.png
+            test -s app/build/outputs/androidTest-results/release-blackbox/resigned-ui.xml
+            printf 'B40 SHA256=9fbef0397928878f09e74d3cc58e55c2be87f3ca6575cc6767202b685b64e6fc: platform and product resign negatives passed\n'
           else
-            printf 'B40 targeted navigation and credential tests passed; download, bridge, and resigned negative NOT COVERED\n'
+            export UJNB_RELEASE_SKIP_BUILD=1 UJNB_RELEASE_QA_SCOPE="$QA_SCOPE"
+            export UJNB_RELEASE_SYMBOLS_FILE=app/build/outputs/androidTest-results/shell-evaluation/symbols.txt
+            if ! bash scripts/test-release.sh; then
+              if [ -f app/build/outputs/androidTest-results/release-blackbox/logcat.txt ]; then
+                grep 'UJNB-ReleaseBlackBox' \
+                  app/build/outputs/androidTest-results/release-blackbox/logcat.txt || true
+              fi
+              exit 1
+            fi
+            if [ "$QA_SCOPE" = full ]; then
+              test -s app/build/outputs/androidTest-results/release-blackbox/resigned-result.txt
+              printf 'B40 final APK SHA256=9fbef0397928878f09e74d3cc58e55c2be87f3ca6575cc6767202b685b64e6fc: full tests + resigned negative passed\n'
+            else
+              printf 'B40 targeted navigation and credential tests passed; download, bridge, and resigned negative NOT COVERED\n'
+            fi
           fi
+      - name: Preserve isolated resign evidence
+        if: always() && inputs.qa_scope == 'resigned-only'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: b40-resigned-evidence
+          path: |
+            ${{ steps.fetch.outputs.workdir }}/source/app/build/outputs/androidTest-results/release-blackbox/resigned-certs.txt
+            ${{ steps.fetch.outputs.workdir }}/source/app/build/outputs/androidTest-results/release-blackbox/resigned-platform.txt
+            ${{ steps.fetch.outputs.workdir }}/source/app/build/outputs/androidTest-results/release-blackbox/resigned-result.txt
+            ${{ steps.fetch.outputs.workdir }}/source/app/build/outputs/androidTest-results/release-blackbox/resigned-ui.xml
+            ${{ steps.fetch.outputs.workdir }}/source/app/build/outputs/androidTest-results/release-blackbox/resigned-blocked.png
+            ${{ steps.fetch.outputs.workdir }}/source/app/build/outputs/androidTest-results/release-blackbox/resigned-failure.png
+          if-no-files-found: warn
+          retention-days: 1
       - name: Remove QA plaintext and scratch files
         if: always()
         shell: bash
