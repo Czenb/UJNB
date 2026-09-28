@@ -28,6 +28,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          sdkmanager_path=$(find "$ANDROID_HOME/cmdline-tools" -maxdepth 4 \
+            -type f -name sdkmanager -print -quit)
+          test -n "$sdkmanager_path"
+          export PATH="$(dirname "$sdkmanager_path"):$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
           sdkmanager --install 'system-images;android-35;google_apis;arm64-v8a'
           printf 'no\n' | avdmanager create avd -n ujnb-b40-smoke \
             -k 'system-images;android-35;google_apis;arm64-v8a' -f
