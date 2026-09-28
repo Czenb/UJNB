@@ -1,0 +1,20 @@
+name: ARM64 runner probe
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  architecture:
+    runs-on: macos-15
+    timeout-minutes: 5
+    steps:
+      - name: Check ARM64 host
+        shell: bash
+        run: |
+          printf 'runner.os=%s\nrunner.arch=%s\n' "$RUNNER_OS" "$RUNNER_ARCH"
+          uname -m
+          test "$RUNNER_OS" = macOS
+          test "$RUNNER_ARCH" = ARM64
+          test "$(uname -m)" = arm64
