@@ -3,6 +3,7 @@
 
 import hashlib
 import importlib.util
+import io
 import json
 import tempfile
 import unittest
@@ -62,6 +63,8 @@ class FakeDevice:
         else:
             assert operation == "clear" and extra["seedId"] == self.marker
             assert extra["seedPayloadSha256"] == self.seeded_sha
+            if self.failure == "backup":
+                raise RuntimeError("QA policy backup restoration receipt mismatch")
             self.marker = None
             state = "restored"
         return (f"INSTRUMENTATION_STATUS: qa_policy_state={state}\n"
@@ -82,11 +85,7 @@ class FakeDevice:
                 raise RuntimeError("fixture bookmark was lost")
             self.retention_verified = True
             return "OK (1 test)\n"
-        assert test == "ReleaseNoticeProbeTest#readOnlyNoticeRevisions"
-        cached = "26" if self.marker else "25"
-        if self.failure == "backup" and self.policies and self.policies[-1] == "clear":
-            cached = "null"
-        return f"notice_probe bundled=25 cached={cached} remote=25 http=200 bytes=1\nOK (1 test)"
+        raise AssertionError(f"unexpected instrumentation: {test}")
 
     def window(self):
         if self.code == "41" and self.marker is None:
@@ -154,6 +153,30 @@ class LocalResponse:
 
 
 class UpgradeScriptTest(unittest.TestCase):
+    def test_public_notice_requires_current_policy(self):
+        class Response(io.BytesIO):
+            status = 200
+
+            def geturl(self):
+                return qa.PUBLIC_NOTICE_URL
+
+        class Opener:
+            def __init__(self, revision):
+                self.revision = revision
+
+            def open(self, request, timeout):
+                assert request.full_url == qa.PUBLIC_NOTICE_URL
+                policy = {"revision": self.revision,
+                          "requiredUpdate": {"minimumVersionCode": 39,
+                                             "targetVersionCode": 39}}
+                return Response(json.dumps(policy).encode("utf-8"))
+
+        with patch.object(qa.urllib.request, "build_opener", return_value=Opener(25)):
+            self.assertEqual(25, qa.public_notice_revision())
+        with patch.object(qa.urllib.request, "build_opener", return_value=Opener(24)):
+            with self.assertRaisesRegex(RuntimeError, "revision25"):
+                qa.public_notice_revision()
+
     def run_scenario(self, retain_data=True, failure=None):
         original_opener = urllib.request.build_opener
         with tempfile.TemporaryDirectory() as temporary:
@@ -170,6 +193,9 @@ class UpgradeScriptTest(unittest.TestCase):
                 nonlocal active_tunnel
                 active_tunnel = FakeTunnel(args, **kwargs)
                 return active_tunnel
+
+            def public_notice():
+                return 24 if failure == "notice" and "clear" in device.policies else 25
 
             class LocalOpener:
                 def open(self, request, timeout=None):
@@ -188,6 +214,7 @@ class UpgradeScriptTest(unittest.TestCase):
                  patch.object(qa, "B41_NAME", "compatible-qa-test"), \
                  patch.object(qa, "SYMBOLS_SHA", digests[3]), \
                  patch.object(qa, "Device", return_value=device), \
+                 patch.object(qa, "public_notice_revision", side_effect=public_notice), \
                  patch.object(qa.subprocess, "Popen", side_effect=create_tunnel), \
                  patch.object(qa.urllib.request, "build_opener", return_value=LocalOpener()), \
                  patch.object(qa.time, "sleep", return_value=None):
@@ -196,6 +223,9 @@ class UpgradeScriptTest(unittest.TestCase):
             self.assertTrue(device.retention_seeded)
             if failure == "marker_changed":
                 self.assertEqual(["seed", "inspect", "inspect"], device.policies)
+                self.assertIsNotNone(device.marker)
+            elif failure == "backup":
+                self.assertEqual(["seed", "inspect", "clear", "inspect", "clear"], device.policies)
                 self.assertIsNotNone(device.marker)
             else:
                 self.assertEqual(["seed", "inspect", "clear"], device.policies)
@@ -257,7 +287,14 @@ class UpgradeScriptTest(unittest.TestCase):
         exit_code, result = self.run_scenario(failure="backup")
         self.assertEqual(1, exit_code)
         self.assertFalse(result["marker_restored"])
-        self.assertIn("backup revision", result["errors"][0])
+        self.assertIn("backup restoration", result["errors"][0])
+
+    def test_public_notice_change_fails_after_cleanup(self):
+        exit_code, result = self.run_scenario(failure="notice")
+        self.assertEqual(1, exit_code)
+        self.assertTrue(result["marker_restored"])
+        self.assertEqual(24, result["remote_revision_after_clear"])
+        self.assertIn("public notice changed", result["errors"][0])
 
     def test_different_marker_is_never_cleared(self):
         exit_code, result = self.run_scenario(failure="marker_changed")
