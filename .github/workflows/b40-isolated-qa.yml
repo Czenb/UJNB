@@ -34,12 +34,15 @@ jobs:
           [[ "$QA_ASSET_ID" =~ ^[0-9]+$ ]]
           workdir=$(mktemp -d "$RUNNER_TEMP/b40qa.XXXXXX")
           echo "workdir=$workdir" >> "$GITHUB_OUTPUT"
-          curl --fail --silent --show-error --location --retry 3 \
+          if ! curl --fail-with-body --silent --show-error --location --retry 3 \
             --header "Authorization: Bearer $GH_TOKEN" \
             --header 'Accept: application/octet-stream' \
             --header 'X-GitHub-Api-Version: 2022-11-28' \
             "https://api.github.com/repos/Czenb/UJNB/releases/assets/$QA_ASSET_ID" \
-            --output "$workdir/input.aesgcm"
+            --output "$workdir/input.aesgcm"; then
+            head -c 500 "$workdir/input.aesgcm" >&2
+            exit 1
+          fi
           printf '%s  %s\n' \
             ed3ad2472020e2694f082a8c1806f6812807426fee6bac2993256112773fc4ae \
             "$workdir/input.aesgcm" | sha256sum -c -
