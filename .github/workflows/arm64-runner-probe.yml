@@ -32,6 +32,9 @@ jobs:
             -type f -name sdkmanager -print -quit)
           test -n "$sdkmanager_path"
           export PATH="$(dirname "$sdkmanager_path"):$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
+          test -c /dev/kvm
+          sudo setfacl -m "u:$(id -un):rw" /dev/kvm
+          test -r /dev/kvm && test -w /dev/kvm
           printf 'y\n%.0s' {1..20} | sdkmanager --licenses > "$RUNNER_TEMP/sdk-licenses.log"
           sdkmanager --install 'system-images;android-35;google_apis;x86_64'
           export ANDROID_AVD_HOME="$RUNNER_TEMP/ujnb-avds"
