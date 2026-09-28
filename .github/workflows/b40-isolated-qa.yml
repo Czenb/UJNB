@@ -7,6 +7,13 @@ on:
         description: Draft release asset ID for the encrypted B40 QA input
         required: true
         type: string
+      qa_scope:
+        description: Isolated QA scope; targeted result is not the full release gate
+        required: true
+        type: choice
+        options:
+          - full
+          - navigation-credential
 
 permissions:
   contents: read
@@ -27,6 +34,7 @@ jobs:
         shell: bash
         env:
           QA_ASSET_ID: ${{ inputs.encrypted_asset_id }}
+          QA_SCOPE: ${{ inputs.qa_scope }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
@@ -43,26 +51,34 @@ jobs:
             head -c 500 "$workdir/input.aesgcm" >&2
             exit 1
           fi
-          printf '%s  %s\n' \
-            4801e8f37ec433980b48669d31a658db89aa9a367eff3f797e6315b76a12213b \
-            "$workdir/input.aesgcm" | sha256sum -c -
+          case "$QA_SCOPE" in
+            full) expected=4801e8f37ec433980b48669d31a658db89aa9a367eff3f797e6315b76a12213b ;;
+            navigation-credential) expected=c3641427ee63e6b45d4af7d99b8cfd51f1e1b0ba17e4c7c2d077568b7e8aff99 ;;
+            *) exit 1 ;;
+          esac
+          printf '%s  %s\n' "$expected" "$workdir/input.aesgcm" | sha256sum -c -
       - name: Authenticate and decrypt QA input
         shell: bash
         env:
           QA_WORKDIR: ${{ steps.fetch.outputs.workdir }}
+          QA_SCOPE: ${{ inputs.qa_scope }}
           UJNB_B40_QA_KEY: ${{ secrets.UJNB_B40_QA_KEY }}
         run: |
           set -euo pipefail
           test -d "$QA_WORKDIR"
           node "$GITHUB_WORKSPACE/.github/scripts/qa-crypto.mjs" decrypt \
             "$QA_WORKDIR/input.aesgcm" "$QA_WORKDIR/input.tar.gz"
-          printf '%s  %s\n' \
-            3d09df0822cb60c012e8387378867bf2619e5ea20910a0d47d8a7f1da712ce60 \
-            "$QA_WORKDIR/input.tar.gz" | sha256sum -c -
+          case "$QA_SCOPE" in
+            full) expected=3d09df0822cb60c012e8387378867bf2619e5ea20910a0d47d8a7f1da712ce60 ;;
+            navigation-credential) expected=ed70a42b157c230ce81bcebaa36c74606d2e9de97f777b4cb89086b29df1370e ;;
+            *) exit 1 ;;
+          esac
+          printf '%s  %s\n' "$expected" "$QA_WORKDIR/input.tar.gz" | sha256sum -c -
       - name: Run isolated final APK tests
         shell: bash
         env:
           QA_WORKDIR: ${{ steps.fetch.outputs.workdir }}
+          QA_SCOPE: ${{ inputs.qa_scope }}
         run: |
           set -euo pipefail
           workdir=$QA_WORKDIR
@@ -82,11 +98,18 @@ jobs:
           mkdir "$workdir/source"
           tar -xzf "$workdir/input.tar.gz" -C "$workdir/source"
           cd "$workdir/source"
-          sha256sum -c - <<'SHA256SUMS'
+          case "$QA_SCOPE" in
+            full) test_sha=ce67812b5da4c7bfdc5ea6216131dbe099829f6f51b60fabe615712307e5205a
+                  script_sha=70b55fd6713f94f925957873978b2d5468c15b6751409ea807495786e3f3f199 ;;
+            navigation-credential) test_sha=074be2c928806deb92315d91070f7cb6d9a7302eac9726b5b18c2e322f85f07e
+                  script_sha=19fa360bdd5000e820a548e9d74f0cbcbad6bd089ce3a5d6660fd78b6b28292f ;;
+            *) exit 1 ;;
+          esac
+          sha256sum -c - <<SHA256SUMS
           9fbef0397928878f09e74d3cc58e55c2be87f3ca6575cc6767202b685b64e6fc  app/build/outputs/apk/release/app-release.apk
-          ce67812b5da4c7bfdc5ea6216131dbe099829f6f51b60fabe615712307e5205a  release-tests/build/outputs/apk/release/release-tests-release.apk
+          $test_sha  release-tests/build/outputs/apk/release/release-tests-release.apk
           01fe196e103ba4be3fb627a906614d707d82db6ab018bba7a29f5470242fba2b  app/build/outputs/androidTest-results/shell-evaluation/symbols.txt
-          70b55fd6713f94f925957873978b2d5468c15b6751409ea807495786e3f3f199  scripts/test-release.sh
+          $script_sha  scripts/test-release.sh
           26c5f73d4d47c4f2d50a3fe7c5d575a821180c3a0eee576a3337a7fef4857263  scripts/test-resigned.py
           abb8ce27e4d6a5a122c1f65d287e95c5b881f799f83a4767ed7bb8cb6631b99b  scripts/emulator_target.py
           SHA256SUMS
@@ -133,6 +156,7 @@ jobs:
             > "$workdir/keytool.log" 2>&1
           export ANDROID_SERIAL=emulator-5558
           export UJNB_RELEASE_SKIP_BUILD=1 UJNB_TRANSFER_VARIANT=official
+          export UJNB_RELEASE_QA_SCOPE="$QA_SCOPE"
           export UJNB_RELEASE_SYMBOLS_FILE=app/build/outputs/androidTest-results/shell-evaluation/symbols.txt
           if ! bash scripts/test-release.sh; then
             if [ -f app/build/outputs/androidTest-results/release-blackbox/logcat.txt ]; then
@@ -141,8 +165,12 @@ jobs:
             fi
             exit 1
           fi
-          test -s app/build/outputs/androidTest-results/release-blackbox/resigned-result.txt
-          printf 'B40 final APK SHA256=9fbef0397928878f09e74d3cc58e55c2be87f3ca6575cc6767202b685b64e6fc: 8 tests + resigned negative passed\n'
+          if [ "$QA_SCOPE" = full ]; then
+            test -s app/build/outputs/androidTest-results/release-blackbox/resigned-result.txt
+            printf 'B40 final APK SHA256=9fbef0397928878f09e74d3cc58e55c2be87f3ca6575cc6767202b685b64e6fc: full tests + resigned negative passed\n'
+          else
+            printf 'B40 targeted navigation and credential tests passed; download, bridge, and resigned negative NOT COVERED\n'
+          fi
       - name: Remove QA plaintext and scratch files
         if: always()
         shell: bash
