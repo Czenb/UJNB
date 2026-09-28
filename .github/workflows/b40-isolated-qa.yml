@@ -44,7 +44,7 @@ jobs:
             exit 1
           fi
           printf '%s  %s\n' \
-            ed3ad2472020e2694f082a8c1806f6812807426fee6bac2993256112773fc4ae \
+            4801e8f37ec433980b48669d31a658db89aa9a367eff3f797e6315b76a12213b \
             "$workdir/input.aesgcm" | sha256sum -c -
       - name: Authenticate and decrypt QA input
         shell: bash
@@ -57,7 +57,7 @@ jobs:
           node "$GITHUB_WORKSPACE/.github/scripts/qa-crypto.mjs" decrypt \
             "$QA_WORKDIR/input.aesgcm" "$QA_WORKDIR/input.tar.gz"
           printf '%s  %s\n' \
-            f75382db38c948492189b2b909ed9254ff5d16e80acf6300762295040dfaaeee \
+            3d09df0822cb60c012e8387378867bf2619e5ea20910a0d47d8a7f1da712ce60 \
             "$QA_WORKDIR/input.tar.gz" | sha256sum -c -
       - name: Run isolated final APK tests
         shell: bash
@@ -84,9 +84,9 @@ jobs:
           cd "$workdir/source"
           sha256sum -c - <<'SHA256SUMS'
           9fbef0397928878f09e74d3cc58e55c2be87f3ca6575cc6767202b685b64e6fc  app/build/outputs/apk/release/app-release.apk
-          a36ff77963bef8830fb355b07ee44e1427d5575ea2ec81779e3fe75bd70fb9ac  release-tests/build/outputs/apk/release/release-tests-release.apk
+          ce67812b5da4c7bfdc5ea6216131dbe099829f6f51b60fabe615712307e5205a  release-tests/build/outputs/apk/release/release-tests-release.apk
           01fe196e103ba4be3fb627a906614d707d82db6ab018bba7a29f5470242fba2b  app/build/outputs/androidTest-results/shell-evaluation/symbols.txt
-          b6f0e7bf1a5e770e64d6a9f542c42e36da4ee681cb8dbac9e5b6609b59571506  scripts/test-release.sh
+          70b55fd6713f94f925957873978b2d5468c15b6751409ea807495786e3f3f199  scripts/test-release.sh
           26c5f73d4d47c4f2d50a3fe7c5d575a821180c3a0eee576a3337a7fef4857263  scripts/test-resigned.py
           abb8ce27e4d6a5a122c1f65d287e95c5b881f799f83a4767ed7bb8cb6631b99b  scripts/emulator_target.py
           SHA256SUMS
@@ -134,7 +134,13 @@ jobs:
           export ANDROID_SERIAL=emulator-5558
           export UJNB_RELEASE_SKIP_BUILD=1 UJNB_TRANSFER_VARIANT=official
           export UJNB_RELEASE_SYMBOLS_FILE=app/build/outputs/androidTest-results/shell-evaluation/symbols.txt
-          bash scripts/test-release.sh
+          if ! bash scripts/test-release.sh; then
+            if [ -f app/build/outputs/androidTest-results/release-blackbox/logcat.txt ]; then
+              grep 'UJNB-ReleaseBlackBox' \
+                app/build/outputs/androidTest-results/release-blackbox/logcat.txt || true
+            fi
+            exit 1
+          fi
           test -s app/build/outputs/androidTest-results/release-blackbox/resigned-result.txt
           printf 'B40 final APK SHA256=9fbef0397928878f09e74d3cc58e55c2be87f3ca6575cc6767202b685b64e6fc: 8 tests + resigned negative passed\n'
       - name: Remove QA plaintext and scratch files
