@@ -150,6 +150,27 @@ class Device:
             raise RuntimeError("visible QA control has invalid bounds")
         self.adb("shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2))
 
+    def scroll_notice(self, nodes):
+        title = next((node for node in nodes if node.get("package") == PACKAGE and
+                      node.get("text") == "公告"), None)
+        button = next((node for node in nodes if node.get("package") == PACKAGE and
+                       node.get("text") == "下载新版本"), None)
+        if title is None or button is None:
+            return False
+        title_bounds = re.fullmatch(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", title.get("bounds", ""))
+        button_bounds = re.fullmatch(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", button.get("bounds", ""))
+        if title_bounds is None or button_bounds is None:
+            return False
+        left, _, right, title_bottom = map(int, title_bounds.groups())
+        button_top = int(button_bounds.group(2))
+        gap = button_top - title_bottom
+        if right <= left or gap < 160:
+            return False
+        x = (left + right) // 2
+        self.adb("shell", "input", "swipe", str(x), str(title_bottom + 3 * gap // 4),
+                 str(x), str(title_bottom + gap // 4), "350")
+        return True
+
 
 def status_field(output, name):
     values = re.findall(rf"(?m)^INSTRUMENTATION_STATUS: {re.escape(name)}=(.+)$", output)
@@ -347,25 +368,34 @@ def run(args):
         deadline = time.monotonic() + 90
         last_nodes = []
         stable_home_samples = 0
+        notice_scrolls = 0
         while time.monotonic() < deadline:
             nodes = device.window()
             last_nodes = nodes
             if any(node.get("text") == "开始使用" for node in nodes):
                 device.tap(next(node for node in nodes if node.get("text") == "开始使用"))
-            matches = [node for node in nodes if node.get("text") == "下载新版本"]
-            if matches and any(node.get("text") == "请更新后继续使用" for node in nodes):
+            matches = [node for node in nodes if node.get("package") == PACKAGE and
+                       node.get("text") == "下载新版本"]
+            if matches and any(node.get("package") == PACKAGE and
+                               node.get("text") == "请更新后继续使用" for node in nodes):
                 device.screenshot(args.workdir / "b40-required.png")
                 device.tap(matches[0])
                 break
+            if matches and notice_scrolls < 6 and device.scroll_notice(nodes):
+                notice_scrolls += 1
+            elif matches and notice_scrolls >= 6:
+                break
             time.sleep(1)
-        else:
+        result["b40_notice_scrolls"] = notice_scrolls
+        if not any(node.get("package") == PACKAGE and
+                   node.get("text") == "请更新后继续使用" for node in last_nodes):
             device.screenshot(args.workdir / "b40-required-failure.png")
             known = ("开始使用", "请更新后继续使用", "下载新版本",
                      "无法获取最新状态，请检查网络后重试。", "设置", "我的")
             result["b40_visible_known_labels"] = sorted({node.get("text") for node in last_nodes
                                                          if node.get("text") in known})
             result["b40_process_running"] = bool(device.adb("shell", "pidof", PACKAGE).strip())
-            raise RuntimeError("frozen B40 did not show the required-update button")
+            raise RuntimeError("frozen B40 did not show the required-update marker")
 
         deadline = time.monotonic() + 1200
         while time.monotonic() < deadline:

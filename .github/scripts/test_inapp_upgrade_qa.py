@@ -17,6 +17,7 @@ SCRIPT = Path(__file__).with_name("inapp_upgrade_qa.py")
 SPEC = importlib.util.spec_from_file_location("inapp_upgrade_qa", SCRIPT)
 qa = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(qa)
+REAL_DEVICE = qa.Device
 
 
 class FakeDevice:
@@ -24,7 +25,10 @@ class FakeDevice:
         self.retain_data = retain_data
         self.failure = failure
         self.code = "40"
-        self.screen = 0
+        self.download_screen = 0
+        self.scrolled = False
+        self.swipes = []
+        self.download_started = False
         self.policies = []
         self.marker = None
         self.seeded_sha = "a" * 64
@@ -37,6 +41,9 @@ class FakeDevice:
     def adb(self, *args, **kwargs):
         if args[:4] == ("shell", "appops", "get", qa.PACKAGE):
             return "REQUEST_INSTALL_PACKAGES: allow"
+        if args[:3] == ("shell", "input", "swipe"):
+            self.swipes.append(args[3:])
+            self.scrolled = True
         return "Success"
 
     def installed(self):
@@ -94,18 +101,29 @@ class FakeDevice:
             if self.failure == "version_check":
                 return [self.node("无法确认最新版本，请联网后重新检查。")]
             return [self.node("设置"), self.node("我的")]
-        self.screen += 1
-        if self.screen == 1:
-            return [self.node("请更新后继续使用"), self.node("下载新版本")]
-        if self.screen == 2:
+        if not self.download_started:
+            nodes = [self.node("公告"), self.node("下载新版本")]
+            if self.scrolled and self.failure != "ordinary_notice":
+                nodes.append(self.node("请更新后继续使用"))
+            return nodes
+        self.download_screen += 1
+        if self.download_screen == 1:
             return [self.node("已下载 32%")]
         return [self.node("Install", "com.google.android.packageinstaller")]
 
     @staticmethod
     def node(label, package=qa.PACKAGE):
-        return {"text": label, "package": package, "bounds": "[1,1][100,100]"}
+        bounds = ("[100,100][900,240]" if label == "公告" else
+                  "[600,1880][950,2000]" if label == "下载新版本" else "[1,1][100,100]")
+        return {"text": label, "package": package, "bounds": bounds}
+
+    def scroll_notice(self, nodes):
+        return REAL_DEVICE.scroll_notice(self, nodes)
 
     def tap(self, node):
+        if node["text"] == "下载新版本":
+            assert self.scrolled and self.failure != "ordinary_notice"
+            self.download_started = True
         if node["text"] == "Install":
             self.code = "41"
 
@@ -232,7 +250,14 @@ class UpgradeScriptTest(unittest.TestCase):
                 self.assertIsNone(device.marker)
             self.assertTrue(result["tunnel_stopped"])
             self.assertTrue(result["http_server_stopped"])
-            self.assertEqual([32], result["progress_samples"])
+            if failure == "ordinary_notice":
+                self.assertEqual([], result["progress_samples"])
+                self.assertEqual(6, len(device.swipes))
+            else:
+                self.assertEqual([32], result["progress_samples"], result.get("errors"))
+                self.assertEqual(1, len(device.swipes))
+            self.assertEqual(("500", "1470", "500", "650", "350"), device.swipes[0])
+            self.assertEqual(len(device.swipes), result["b40_notice_scrolls"])
             self.assertEqual(len(files[2].read_bytes()), result["public_get_bytes"])
             self.assertNotIn("qa_url", result)
             self.assertEqual(64, len(result["qa_url_sha256"]))
@@ -249,6 +274,14 @@ class UpgradeScriptTest(unittest.TestCase):
         self.assertTrue(result["retention_verified"])
         self.assertTrue(result["marker_restored"])
         self.assertEqual(25, result["remote_revision_after_clear"])
+
+    def test_same_download_label_without_required_update_marker_cannot_pass(self):
+        exit_code, result = self.run_scenario(failure="ordinary_notice")
+        self.assertEqual(1, exit_code)
+        self.assertEqual("failed", result["status"])
+        self.assertFalse(result["installer_seen"])
+        self.assertEqual(6, result["b40_notice_scrolls"])
+        self.assertIn("required-update marker", result["errors"][0])
 
     def test_data_loss_fails_and_cleans_up(self):
         exit_code, result = self.run_scenario(False)
