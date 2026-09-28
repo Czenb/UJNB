@@ -34,8 +34,12 @@ jobs:
           export PATH="$(dirname "$sdkmanager_path"):$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
           printf 'y\n%.0s' {1..20} | sdkmanager --licenses > "$RUNNER_TEMP/sdk-licenses.log"
           sdkmanager --install 'system-images;android-35;google_apis;x86_64'
+          export ANDROID_AVD_HOME="$RUNNER_TEMP/ujnb-avds"
+          mkdir -p "$ANDROID_AVD_HOME"
           printf 'no\n' | avdmanager create avd -n ujnb-b40-smoke \
             -k 'system-images;android-35;google_apis;x86_64' -d pixel_4 -f
+          "$ANDROID_HOME/emulator/emulator" -list-avds
+          test -f "$ANDROID_AVD_HOME/ujnb-b40-smoke.ini"
           "$ANDROID_HOME/emulator/emulator" -avd ujnb-b40-smoke -port 5558 \
             -no-window -no-audio -no-snapshot -no-boot-anim -accel on \
             -gpu swiftshader_indirect -memory 2048 -partition-size 2048 \
