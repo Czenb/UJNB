@@ -148,7 +148,9 @@ def notice_revisions(output):
     match = re.search(r"notice_probe bundled=(\d+) cached=(\d+|null) "
                       r"remote=(\d+|null) http=(\d+)", output)
     if not match or match.group(3) != "25" or match.group(4) != "200":
-        raise RuntimeError("public revision25 notice was not confirmed")
+        probe_lines = [line.strip() for line in output.splitlines()
+                       if "notice_probe" in line]
+        raise RuntimeError(f"public revision25 notice was not confirmed: {probe_lines[-2:]}")
     return match.group(2)
 
 
